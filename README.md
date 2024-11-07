@@ -1,64 +1,72 @@
-# Beach vs. Mountain Classifier
+# Text Analysis for Term Frequency (TF) and Document Frequency (DF)
 
-This project implements a binary classifier to distinguish between beach and mountain images using a modified ResNet50 model pre-trained on the Places365 dataset. The classifier is trained using a custom dataset and evaluated to measure its accuracy.
+This project provides a Python-based solution for calculating Term Frequency (TF) and Document Frequency (DF) from a set of text documents. This approach allows efficient frequency analysis, which is useful for tasks like keyword extraction, similarity search, and other text-based analyses.
 
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Dataset](#dataset)
-- [Installation](#installation)
-- [Training the Model](#training-the-model)
-- [Evaluating the Model](#evaluating-the-model)
-- [Results](#results)
+## Project Structure
 
-## Project Overview
-The classifier leverages transfer learning with ResNet50 pre-trained on the Places365 dataset, which is then fine-tuned for a binary classification task (beach vs. mountain). After training, the model can be used to classify new images.
+- **Data Ingestion**: Load and preprocess a collection of documents, where each document contains fields like `name` and `description`.
+- **TF Calculation**: Calculates Term Frequency (TF) for each word in each document.
+- **DF Calculation**: Computes Document Frequency (DF) for each word across the entire document set.
+- **TF-IDF Calculation**: Combines TF and DF values to calculate TF-IDF scores for more insightful frequency analysis.
 
-## Dataset
-The model is trained on the custom `BeachMountainDataset`, located in the `dataset.py` file. This dataset is expected to contain labeled images of beaches and mountains in the specified directory.
+## Requirements
 
-## Installation
-1. Clone the repository:
+- Python 3.x
+- `pandas` for data handling (install using `pip install pandas`)
+
+## Setup and Usage
+
+1. **Install Dependencies**: Ensure `pandas` is installed:
    ```bash
-   git clone https://github.com/yourusername/beach-mountain-classifier.git
-   cd beach-mountain-classifier
+   pip install pandas
    ```
+2. **Run the Script**:
+   - Load documents from a CSV file or list.
+   - Preprocess the text, calculate TF, DF, and TF-IDF scores.
 
-2. Install the required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Code Overview
 
-3. Ensure that the `resnet50_places365.pth.tar` file (pre-trained Places365 weights) is in the project directory. You can download it from the [official Places365 repository](https://github.com/CSAILVision/places365).
-
-## Training the Model
-To train the model, simply run:
-```bash
-python train.py
-```
-
-This will:
-- Train the model for 10 epochs on the custom dataset.
-- Save the trained model weights in `beach_mountain_classifier.pth`.
-- Generate and save training/validation loss and accuracy plots as `training_results.png`.
-
-## Evaluating the Model
-To evaluate the model, load the saved weights and run inference on a test set. Example code for loading and testing the model is provided in `train.py`. Alternatively, you can add the following code to evaluate the model after training:
-
+### Preprocess Data
 ```python
-# Load the model
-model = Places365Classifier(num_classes=2)
-model.load_state_dict(torch.load('beach_mountain_classifier.pth'))
-model.eval()
-
-# Use `test_loader` to evaluate accuracy on test images
+def preprocess_text(text):
+    # Tokenizes and lowercases text
+    ...
 ```
 
-## Results
-Training and validation results are saved as `training_results.png`. The accuracy of the model on test images is printed at the end of evaluation.
+### Calculate Term Frequency (TF)
+```python
+# Define a function to calculate TF
+def calculate_tf(documents):
+    ...
+```
 
-## Notes
-- This code uses CUDA if available; otherwise, it defaults to CPU.
-- The `torch.load` function now includes `weights_only=True` to prevent security risks from untrusted models.
+### Calculate Document Frequency (DF)
+```python
+# Define a function to calculate DF
+def calculate_df(documents):
+    ...
+```
+
+### Calculate TF-IDF
+```python
+# Use TF and DF to calculate TF-IDF
+import math
+tf_idf_results = [...]
+```
+
+## Example Output
+
+For each document:
+```
+Document ID: <id>
+  Word: <word>, TF-IDF: <score>
+```
+
+## Future Improvements
+
+- **MongoDB Integration**: Implement MongoDB for efficient storage, retrieval, and processing of text data, allowing aggregation-based TF and DF calculations.
+- **Advanced Text Preprocessing**: Add options for stop-word removal, stemming, and lemmatization.
 
 ## License
-This project is licensed under the MIT License.
+
+This project is open-source and available under the [MIT License](LICENSE).
