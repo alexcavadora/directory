@@ -1,5 +1,3 @@
-Here’s a simple `README.md` for your project:
-
 # Beach vs. Mountain Classifier
 
 This project implements a binary classifier to distinguish between beach and mountain images using a modified ResNet50 model pre-trained on the Places365 dataset. The classifier is trained using a custom dataset and evaluated to measure its accuracy.
