@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.fromnumeric import size
 import pandas as pd
 
 class SimilaritySearch:
@@ -25,5 +26,6 @@ class SimilaritySearch:
         return pd.DataFrame({
             'Names' : [self.names[i] for i in non_zero_indices],
             'Description': [self.descriptions[i] for i in non_zero_indices],
+            'Length:':  [len(self.descriptions[i]) for i in non_zero_indices],
             'Similarity':  [similarities[i] for i in non_zero_indices]
             })

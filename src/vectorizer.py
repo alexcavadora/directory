@@ -39,4 +39,6 @@ class Vectorizer:
 
         # Convert query to TF-IDF vector
         tf_idf_vector = [query_tf[word] * self.idf.get(word, 0) for word in self.vocabulary]
+        df = np.array(tf_idf_vector)
+        np.savetxt("tfidf_vector.csv", tf_idf_vector, delimiter=',')
         return np.array(tf_idf_vector)
