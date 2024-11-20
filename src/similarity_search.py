@@ -1,31 +1,40 @@
-import numpy as np
-from numpy.core.fromnumeric import size
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 
-class SimilaritySearch:
-    def __init__(self, names, descriptions, description_vectors):
+class SentenceSimilaritySearch:
+    def __init__(self, names, documents, vectorizer):
         self.names = names
-        self.descriptions = descriptions
-        self.description_vectors = description_vectors
+        self.vectorizer = vectorizer
+        self.sentence_vectors, self.sentences = vectorizer.fit_transform(documents)
+        self.sentence_to_name = []
+        for i, doc in enumerate(documents):
+            sentences = vectorizer.split_sentences(doc)
+            self.sentence_to_name.extend([names[i]] * len(sentences))
 
-    def cosine_similarity(self, vec1, vec2):
-        # Calculate cosine similarity between two vectors
-        dot_product = np.dot(vec1, vec2)
-        norm_vec1 = np.linalg.norm(vec1)
-        norm_vec2 = np.linalg.norm(vec2)
-        return dot_product / (norm_vec1 * norm_vec2) if norm_vec1 and norm_vec2 else 0
+    def find_similar_sentences(self, query, top_n=10):
+        query_vector = self.vectorizer.transform_sentence(query).reshape(1, -1)
+        print("tokens: ",self.vectorizer.preprocess(query))
+        similarities = cosine_similarity(query_vector, self.sentence_vectors).flatten()
+        results = pd.DataFrame({
+            'Name': self.sentence_to_name,
+            'Sentence': self.sentences,
+            'Similarity': similarities
+        })
 
-    def find_similar(self, query_vector, top_n=20):
-        # Compute similarities for the query vector against all description vectors
-        similarities = [self.cosine_similarity(query_vector, doc_vec) for doc_vec in self.description_vectors]
+        results = results[results['Similarity'] > 0]
 
-        top_indices = np.argsort(similarities)[-top_n:][::-1]
+        aggregated_results = results.groupby('Name', as_index=False).agg(
+            {'Similarity': 'sum'}
+        )
+        aggregated_results = aggregated_results.sort_values(by='Similarity', ascending=False)
 
-        non_zero_indices = [i for i in top_indices if similarities[i] > 0]
+        results = results.merge(aggregated_results[['Name', 'Similarity']], on='Name', suffixes=('', '_aggregated'))
+        results = results.sort_values(by='Similarity', ascending=False)
+        ordered_results = []
 
-        return pd.DataFrame({
-            'Names' : [self.names[i] for i in non_zero_indices],
-            'Description': [self.descriptions[i] for i in non_zero_indices],
-            'Length:':  [len(self.descriptions[i]) for i in non_zero_indices],
-            'Similarity':  [similarities[i] for i in non_zero_indices]
-            })
+        for name in aggregated_results['Name']:
+            person_results = results[results['Name'] == name]
+            ordered_results.append(person_results[['Name', 'Sentence', 'Similarity']])
+        final_results = pd.concat(ordered_results)
+
+        return final_results.head(top_n)

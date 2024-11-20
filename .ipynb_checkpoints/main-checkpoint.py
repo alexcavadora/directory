@@ -1,15 +1,16 @@
 import sys
 import pandas as pd
 from pymongo import MongoClient
-from spacy.tokens.token import Token
-from src.similarity_search import SentenceSimilaritySearch
+from src.similarity_search import SimilaritySearch
 from src.vectorizer import Vectorizer
-from os import system
 
 def load_data_from_mongodb():
+    # Connect to MongoDB
     client = MongoClient('mongodb://alex:Z@localhost:27017/?authSource=admin', 27017)
-    db = client['directory']
-    collection = db['lidia']
+    db = client['directory']  # Replace with your database name
+    collection = db['lidia']  # Replace with your collection name
+
+    # Retrieve data from MongoDB
     data = list(collection.find())
     descriptions = [doc['description'] for doc in data]
     names = [doc['name'] for doc in data]
@@ -22,13 +23,18 @@ if __name__ == "__main__":
         sys.exit(1)
 
     query = sys.argv[1]
+
+    # Load data from MongoDB
     names, descriptions = load_data_from_mongodb()
 
     vectorizer = Vectorizer()
-    similarity_search = SentenceSimilaritySearch(names, descriptions, vectorizer)
+    description_vectors = vectorizer.fit_transform(descriptions)
 
-    top_matches = similarity_search.find_similar_sentences(query, top_n=10)
-    pd.set_option('display.max_colwidth', None)
-    top_matches['Sentence'] = top_matches['Sentence'].str.replace(',','')
-    top_matches.to_csv("results.csv", sep=",")
-    system("column -s, -t < results.csv")
+    # Create SimilaritySearch instance with the vectorizer
+    similarity_search = SimilaritySearch(names, descriptions, description_vectors, vectorizer)
+
+    query_vector = vectorizer.transform(query)
+
+    top_matches = similarity_search.find_similar(query)
+
+    print(top_matches)
