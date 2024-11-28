@@ -5,7 +5,6 @@ from src.similarity_search import SentenceSimilaritySearch
 from src.vectorizer import Vectorizer
 from os import system
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 def plot_enneagram(vocabulary):
@@ -21,8 +20,8 @@ def plot_enneagram(vocabulary):
                 else:
                     word_subsets[subset] = 1
 
-        subsets = [subset for subset, count in word_subsets.items() if count > 1]
-        counts = [count for count in word_subsets.values() if count > 1]
+        subsets = [subset for subset, count in word_subsets.items()]
+        counts = [count for count in word_subsets.values()]
 
         if len(subsets) == 0:
             plt.figure(figsize=(12, 6))
@@ -40,6 +39,10 @@ def plot_enneagram(vocabulary):
         plt.tight_layout()
         #plt.subplots_adjust(top=1, bottom=0)
         plt.show()
+
+        with open(f'degree_{degree}_subsets.txt', 'w') as f:
+            for subset, count in word_subsets.items():
+                f.write(f'{subset}: {count}\n')
 
 def load_data_from_mongodb():
     client = MongoClient('mongodb://alex:Z@localhost:27017/?authSource=admin', 27017)
@@ -67,4 +70,5 @@ if __name__ == "__main__":
     top_matches['Sentence'] = top_matches['Sentence'].str.replace(',','')
     top_matches.to_csv("results.csv", sep=",")
     system("column -s, -t < results.csv")
-    #plot_enneagram(vectorizer.sentences_split)
+    plot_enneagram(vectorizer.sentences_split)
+    
