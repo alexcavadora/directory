@@ -2,7 +2,7 @@ import math
 from collections import Counter, defaultdict
 import numpy as np
 import spacy
-
+import pandas as pd
 class Vectorizer:
     def __init__(self):
         self.idf = {}
@@ -25,9 +25,9 @@ class Vectorizer:
     def fit_transform(self, documents):
         # Split documents into sentences and preprocess
         all_sentences = [sent for doc in documents for sent in self.split_sentences(doc)]
-        self.sentences_split = all_sentences
+        
         preprocessed_sentences = [' '.join(self.preprocess(sent)) for sent in all_sentences]
-
+        self.sentences_split = preprocessed_sentences
         # Compute TF-IDF
         tf_documents = [Counter(sent.split()) for sent in preprocessed_sentences]
         doc_count = len(preprocessed_sentences)
@@ -38,7 +38,7 @@ class Vectorizer:
 
         self.idf = {word: math.log(doc_count / (1 + freq)) for word, freq in df.items()}
         self.vocabulary = {word: idx for idx, word in enumerate(self.idf.keys())}
-
+        #pd.DataFrame(list(self.vocabulary.keys()), columns=['word']).to_csv('vocabulary.csv', index=False)
         tf_idf_matrix = []
         for tf in tf_documents:
             row = [tf[word] * self.idf[word] if word in tf else 0 for word in self.vocabulary]
