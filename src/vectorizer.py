@@ -8,6 +8,7 @@ class Vectorizer:
         self.idf = {}
         self.vocabulary = {}
         self.nlp = spacy.load("es_core_news_lg")
+        self.sentences_split = []
 
     def preprocess(self, text):
         # Tokenization, lemmatization, and stop word removal
@@ -18,11 +19,13 @@ class Vectorizer:
     def split_sentences(self, document):
         doc = self.nlp(document)
         sentences = [sent.text for sent in doc.sents]
+        
         return sentences
 
     def fit_transform(self, documents):
         # Split documents into sentences and preprocess
         all_sentences = [sent for doc in documents for sent in self.split_sentences(doc)]
+        self.sentences_split = all_sentences
         preprocessed_sentences = [' '.join(self.preprocess(sent)) for sent in all_sentences]
 
         # Compute TF-IDF
